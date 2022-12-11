@@ -20,7 +20,7 @@ fn parse_input() -> DirTable {
     let cd_re = Reparse::new(r"^\$ cd ([a-z]+)$");
     let ls_re = Reparse::new(r"^\$ ls$");
     let dir_re = Reparse::new(r"^dir ([a-z]+)$");
-    let file_re = Reparse::new(r"^([0-9]+) ([a-z.]+)$");
+    let file_re = Reparse::new(r"^([0-9]+) ([^ ]+)$");
 
     let mut result: DirTable = HashMap::new();
     let mut cwd = Path::new();
@@ -71,8 +71,38 @@ fn dir_total_size(dirs: &DirTable, path: &Path) -> usize {
         .sum()
 }
 
+fn print_dir_table(dirs: &DirTable) {
+    let mut paths: Vec<&Path> = dirs.keys().collect();
+    paths.sort();
+    for &p in &paths {
+        println!("{}", p.join("/"));
+        let fs = dirs.get(p).unwrap();
+        for (name, size) in fs.iter() {
+            println!("    {size} {name}");
+        }
+        let np = p.len();
+        for sd in &paths {
+            if sd.len() == np + 1 && sd.starts_with(p) {
+                println!("    dir {}", sd.last().unwrap());
+            }
+        }
+    }
+}
+
+fn print_total_sizes(dirs: &DirTable) {
+    let mut paths: Vec<&Path> = dirs.keys().collect();
+    paths.sort();
+    for p in paths {
+        println!("{} {}", p.join("/"), dir_total_size(dirs, p));
+    }
+}
+
 fn main() {
     let dirs = parse_input();
+    print_dir_table(&dirs);
+    println!();
+    print_total_sizes(&dirs);
+    println!();
     match get_part() {
         Part1 => {
             let total: usize = dirs

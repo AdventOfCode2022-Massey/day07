@@ -24,4 +24,3 @@ features = ["reparse"]
 
 [features]
 logging = []
-default_features = ["logging"]

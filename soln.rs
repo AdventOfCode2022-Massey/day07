@@ -104,8 +104,8 @@ fn dir_total_size(dirs: &DirTable, path: &Path) -> usize {
         .sum()
 }
 
-/// Select all the paths with legal total size
-/// and sum their sizes.
+/// Select all the paths with legal total size and sum their
+/// sizes.
 fn solve_part1(dirs: &DirTable, max: usize) -> usize {
     dirs
         .keys()
@@ -120,6 +120,29 @@ fn solve_part1(dirs: &DirTable, max: usize) -> usize {
         .sum()
 }
 
+/// Select some path with smallest total dir size such that
+/// removing it and its children will leave at least
+/// `req_free` space given the `fs_size` total space.
+/// Return the total dir size of the path to be removed.
+fn solve_part2(dirs: &DirTable, fs_size: usize, req_free: usize) -> usize {
+    // First find out how much free space is initially available.
+    let free = fs_size - dir_total_size(dirs, &vec![]);
+
+    // Next, find the smallest path that can be deleted to
+    // achieve the required free size.
+    dirs
+        .keys()
+        .filter_map(|k| {
+            let size = dir_total_size(dirs, k);
+            if free + size >= req_free {
+                Some(size)
+            } else {
+                None
+            }
+        })
+        .min()
+        .unwrap()
+}
 
 #[cfg(test)]
 mod test {
@@ -236,6 +259,9 @@ fn main() {
             let total = solve_part1(&dirs, 100_000);
             println!("{total}");
         }
-        Part2 => todo!(),
+        Part2 => {
+            let to_remove = solve_part2(&dirs, 70_000_000, 30_000_000);
+            println!("{to_remove}");
+        }
     }
 }

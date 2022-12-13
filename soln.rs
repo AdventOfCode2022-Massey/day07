@@ -109,6 +109,71 @@ fn dir_total_size(dirs: &DirTable, path: &Path) -> usize {
         .sum()
 }
 
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    macro_rules! path {
+        ($($seg:literal),*) => {
+            vec![$($seg.to_string()),*]
+        };
+    }
+
+    macro_rules! file {
+        ($name:literal, $value:literal) => {
+            ($name.to_string(), $value)
+        };
+    }
+
+    fn make_dir_table() -> DirTable {
+        let t = [
+            (path![], vec![
+                file!{"a0f0", 10_000},
+            ]),
+            (path!["a0"], vec![
+                file!{"a0f0", 9_999},
+                file!{"a0f1", 1},
+            ]),
+            (path!["a0", "a1"], vec![
+                file!{"a1f0", 9_998},
+                file!{"a1f1", 2},
+            ]),
+            (path!["a0", "a1", "a2"], vec![
+                file!{"a1f0", 9_997},
+                file!{"a1f1", 3},
+            ]),
+            (path!["a0", "a1", "b2"], vec![
+                file!{"a1f0", 9_996},
+                file!{"a1f1", 4},
+            ]),
+        ];
+        t
+            .into_iter()
+            .map(|(path, files)| (path, files.into_iter().collect()))
+            .collect()
+    }
+
+    #[test]
+    fn test_dir_size() {
+        let t = make_dir_table();
+        assert_eq!(10_000, dir_size(&t, &path![]));
+        assert_eq!(10_000, dir_size(&t, &path!["a0"]));
+        assert_eq!(10_000, dir_size(&t, &path!["a0", "a1"]));
+        assert_eq!(10_000, dir_size(&t, &path!["a0", "a1", "a2"]));
+        assert_eq!(10_000, dir_size(&t, &path!["a0", "a1", "b2"]));
+    }
+
+    #[test]
+    fn test_dir_total_size() {
+        let t = make_dir_table();
+        assert_eq!(50_000, dir_total_size(&t, &path![]));
+        assert_eq!(40_000, dir_total_size(&t, &path!["a0"]));
+        assert_eq!(30_000, dir_total_size(&t, &path!["a0", "a1"]));
+        assert_eq!(10_000, dir_total_size(&t, &path!["a0", "a1", "a2"]));
+        assert_eq!(10_000, dir_total_size(&t, &path!["a0", "a1", "b2"]));
+    }
+}
+
 #[cfg(feature = "logging")]
 /// Show the given `dirs` and their files in
 /// lexical-alphabetical order.

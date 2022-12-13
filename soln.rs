@@ -37,41 +37,24 @@ fn parse_input() -> DirTable {
     let mut result: DirTable = HashMap::new();
     let mut cwd = Path::new();
 
-    // Insert the file with given `name` and `size` into the
-    // directory at the given `path`, creating a new
-    // `result` directory entry for `path` if needed.
-    let mut insert_file = |path: &Path, name: String, size: usize| {
-        if let Some(entry) = result.get_mut(path) {
-            // We may visit a file for a subsequent time,
-            // in which case the file size should be identical
-            // to previous visits.
-            if let Some(&old_size) = entry.get(&name) {
-                assert_eq!(size, old_size);
-            } else {
-                entry.insert(name, size);
-            }
-        } else {
-            // Make a new directory with the given file in it.
-            let files: Files = [(name, size)].into_iter().collect();
-            result.insert(path.clone(), files);
-        }
-    };
-
     // Parse the lines of the input.
     for line in input_lines() {
         #[allow(clippy::if_same_then_else)]
         if cd_root_re.parse(&line).is_some() {
             // Drop the existing path and go back to the root.
             cwd = Path::new();
+            result.entry(cwd.clone()).or_insert_with(Files::new);
         } else if cd_up_re.parse(&line).is_some() {
             // Drop the last component of the existing cwd.
             // Will panic if going above the root is
             // attempted.
             assert!(cwd.pop().is_some());
+            assert!(result.get(&cwd).is_some());
         } else if let Some(fields) = cd_re.parse(&line) {
             // Add a new named component to the end of cwd.
             let name: String = fields.get(1);
             cwd.push(name);
+            result.entry(cwd.clone()).or_insert_with(Files::new);
         } else if ls_re.parse(&line).is_some() {
             // Ignore `ls` lines as they have no useful information.
         } else if dir_re.parse(&line).is_some() {
@@ -80,7 +63,19 @@ fn parse_input() -> DirTable {
             // Insert the given file into the structure.
             let size: usize = fields.get(1);
             let name: String = fields.get(2);
-            insert_file(&cwd, name, size);
+
+            // This path should have been established earlier by
+            // some "cd" command.
+            let entry = result.get_mut(&cwd).unwrap();
+
+            // We may visit a file for a subsequent time,
+            // in which case the file size should be identical
+            // to previous visits.
+            if let Some(&old_size) = entry.get(&name) {
+                assert_eq!(size, old_size);
+            } else {
+                entry.insert(name, size);
+            }
         } else {
             panic!("unknown input line: {line}");
         }

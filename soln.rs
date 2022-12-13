@@ -145,23 +145,20 @@ mod test {
     fn make_dir_table() -> DirTable {
         let t = [
             (path![], vec![
-                file!{"a0f0", 10_000},
+                file!{"f0", 10_000},
             ]),
             (path!["a0"], vec![
-                file!{"a0f0", 9_999},
-                file!{"a0f1", 1},
+                file!{"f0", 9_999},
+                file!{"f1", 1},
             ]),
-            (path!["a0", "a1"], vec![
-                file!{"a1f0", 9_998},
-                file!{"a1f1", 2},
-            ]),
+            (path!["a0", "a1"], vec![]),
             (path!["a0", "a1", "a2"], vec![
-                file!{"a1f0", 9_997},
-                file!{"a1f1", 3},
+                file!{"f0", 9_997},
+                file!{"f1", 3},
             ]),
             (path!["a0", "a1", "b2"], vec![
-                file!{"a1f0", 9_996},
-                file!{"a1f1", 4},
+                file!{"f0", 9_996},
+                file!{"f1", 4},
             ]),
         ];
         t
@@ -175,7 +172,7 @@ mod test {
         let t = make_dir_table();
         assert_eq!(10_000, dir_size(&t, &path![]));
         assert_eq!(10_000, dir_size(&t, &path!["a0"]));
-        assert_eq!(10_000, dir_size(&t, &path!["a0", "a1"]));
+        assert_eq!(0, dir_size(&t, &path!["a0", "a1"]));
         assert_eq!(10_000, dir_size(&t, &path!["a0", "a1", "a2"]));
         assert_eq!(10_000, dir_size(&t, &path!["a0", "a1", "b2"]));
     }
@@ -183,9 +180,9 @@ mod test {
     #[test]
     fn test_dir_total_size() {
         let t = make_dir_table();
-        assert_eq!(50_000, dir_total_size(&t, &path![]));
-        assert_eq!(40_000, dir_total_size(&t, &path!["a0"]));
-        assert_eq!(30_000, dir_total_size(&t, &path!["a0", "a1"]));
+        assert_eq!(40_000, dir_total_size(&t, &path![]));
+        assert_eq!(30_000, dir_total_size(&t, &path!["a0"]));
+        assert_eq!(20_000, dir_total_size(&t, &path!["a0", "a1"]));
         assert_eq!(10_000, dir_total_size(&t, &path!["a0", "a1", "a2"]));
         assert_eq!(10_000, dir_total_size(&t, &path!["a0", "a1", "b2"]));
     }
@@ -193,8 +190,8 @@ mod test {
     #[test]
     fn test_solve_part1() {
         let t = make_dir_table();
-        assert_eq!(140_000, solve_part1(&t, 50_000));
-        assert_eq!(90_000, solve_part1(&t, 40_000));
+        assert_eq!(110_000, solve_part1(&t, 40_000));
+        assert_eq!(70_000, solve_part1(&t, 30_000));
         assert_eq!(20_000, solve_part1(&t, 10_000));
     }
 }

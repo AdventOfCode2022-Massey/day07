@@ -109,6 +109,23 @@ fn dir_total_size(dirs: &DirTable, path: &Path) -> usize {
         .sum()
 }
 
+/// Select all the paths with legal total size
+/// and sum their sizes.
+fn solve_part1(dirs: &DirTable, max: usize) -> usize {
+    dirs
+        .keys()
+        .filter_map(|p| {
+            let s = dir_total_size(dirs, p);
+            if s <= max {
+                Some(s)
+            } else {
+                None
+            }
+        })
+        .sum()
+}
+
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -172,6 +189,14 @@ mod test {
         assert_eq!(10_000, dir_total_size(&t, &path!["a0", "a1", "a2"]));
         assert_eq!(10_000, dir_total_size(&t, &path!["a0", "a1", "b2"]));
     }
+
+    #[test]
+    fn test_solve_part1() {
+        let t = make_dir_table();
+        assert_eq!(140_000, solve_part1(&t, 50_000));
+        assert_eq!(90_000, solve_part1(&t, 40_000));
+        assert_eq!(20_000, solve_part1(&t, 10_000));
+    }
 }
 
 #[cfg(feature = "logging")]
@@ -216,19 +241,7 @@ fn main() {
     }
     match get_part() {
         Part1 => {
-            // Select all the paths with legal total size
-            // and sum their sizes.
-            let total: usize = dirs
-                .keys()
-                .filter_map(|p| {
-                    let s = dir_total_size(&dirs, p);
-                    if s <= 100_000 {
-                        Some(s)
-                    } else {
-                        None
-                    }
-                })
-                .sum();
+            let total = solve_part1(&dirs, 100_000);
             println!("{total}");
         }
         Part2 => todo!(),

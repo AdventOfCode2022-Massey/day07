@@ -21,3 +21,7 @@ path = "soln.rs"
 version = "0.2"
 git = "https://github.com/BartMassey/libaoc"
 features = ["reparse"]
+
+[features]
+logging = []
+default_features = ["logging"]

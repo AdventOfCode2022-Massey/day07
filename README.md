@@ -3,7 +3,7 @@ Ben and Bart Massey
 
 ---
 
-OK, I think we're done here.
+OK, I think we're almost done here.
 
 Ben has kind of dropped out at this point. I (Bart) spent
 six days trying to figure out why my perfectly clean and
@@ -42,7 +42,8 @@ that my sum was low by the total size of these directories.
 
 Given the debugged Part 1, the solution to Part 2 was easy.
 
-The fun has gone now. Enjoy Advent of Code!
+The fun has gone now. I'll keep going until more like this
+pop up shortly. Enjoy Advent of Code!
 
 ---
 
